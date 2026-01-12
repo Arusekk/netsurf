@@ -653,6 +653,22 @@ redraw(void *data)
 	pixman_region32_clear(&p->damage);
 }
 
+static int
+memfd(void)
+{
+	int fd;
+	char template[] = "/tmp/netsurf-XXXXXX";
+
+	fd = syscall(SYS_memfd_create, "netsurf", 0);
+	if (fd >= 0)
+		return fd;
+	fd = mkstemp(template);
+	if (fd < 0)
+		return fd;
+	(void)unlink(template);
+	return fd;
+}
+
 static struct wlimage *
 createimage(int w, int h)
 {
@@ -665,7 +681,7 @@ createimage(int w, int h)
 		goto err0;
 	stride = w * 4;
 	i->size = h * stride;
-	fd = syscall(SYS_memfd_create, "netsurf", 0);
+	fd = memfd();
 	if (fd < 0)
 		goto err1;
 	if (posix_fallocate(fd, 0, i->size) < 0)
