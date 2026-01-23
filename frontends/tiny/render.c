@@ -1060,7 +1060,8 @@ plot_path(const struct redraw_context *ctx, const plot_style_t *style, const flo
 			}
 		}
 #undef NE
-		FT_Stroker_EndSubPath(stroker);
+		if (moved)
+			FT_Stroker_EndSubPath(stroker);
 		err = fterror(FT_Stroker_GetCounts(stroker, &npoints, &ncontours));
 		if (err != NSERROR_OK)
 			goto err;
